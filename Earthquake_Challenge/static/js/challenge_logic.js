@@ -31,23 +31,67 @@ let baseMaps = {
 // 1. Add a 2nd layer group for the tectonic plate data.
 let allEarthquakes = new L.LayerGroup();
 let tectonicPlates = new L.LayerGroup();
+let majorEarthquakes = new L.LayerGroup();
 
 
 // 2. Add a reference to the tectonic plates group to the overlays object.
 let overlays = {
   "Earthquakes": allEarthquakes,
-  "Tectonic Plates": tectonicPlates
+  "Tectonic Plates": tectonicPlates,
+  "Major Earthquakes": majorEarthquakes
 };
 
 // Then we add a control to the map that will allow the user to change which
 // layers are visible.
 L.control.layers(baseMaps, overlays).addTo(map);
 
+// Retrieve the major Earthquake data
+let majorEarthquakesMap = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson";
+d3.json(majorEarthquakesMap).then(function(data) {
+ console.log(data);
+  L.geoJson(data, {
+    opacity: 1,
+    fillOpacity: 1,
+    fillColor: getColor2(feature.properties.mag),
+    color: "#000000",
+    radius: getRadius2(feature.properties.mag),
+    stroke: true,
+    weight: 0.5
+  })
+  addTo(majorEarthquakes);
+  majorEarthquakes.addTo(map);
+});
+
+  // This function determines the color of the marker based on the magnitude of the earthquake.
+  function getColor2(magnitude) {
+    if (magnitude < 5) {
+      return "#ea2c2c";
+    }
+    if (magnitude > 5) {
+      return "#ea822c";
+    }
+    if (magnitude > 6) {
+      return "#ee9c00";
+    }
+    return "#98ee00";
+  }
+
+  // This function determines the radius of the earthquake marker based on its magnitude.
+  // Earthquakes with a magnitude of 0 were being plotted with the wrong radius.
+  function getRadius2(magnitude) {
+    if (magnitude === 0) {
+      return 1;
+    }
+    return magnitude * 4;
+  }
+
+
+
 // Retrieve the tectonic data
 let tectonicMap = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
 d3.json(tectonicMap).then(function(data) {
- console.log(data);
+//  console.log(data);
   L.geoJson(data, {
     color: 'blue',
     weight: 3
@@ -107,7 +151,7 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
   L.geoJson(data, {
     	// We turn each feature into a circleMarker on the map.
     	pointToLayer: function(feature, latlng) {
-      		console.log(data);
+      		// console.log(data);
       		return L.circleMarker(latlng);
         },
       // We set the style for each circleMarker using our styleInfo function.
@@ -143,7 +187,7 @@ legend.onAdd = function() {
 
 // Looping through our intervals to generate a label with a colored square for each interval.
   for (var i = 0; i < magnitudes.length; i++) {
-    console.log(colors[i]);
+    // console.log(colors[i]);
     div.innerHTML +=
       "<i style='background: " + colors[i] + "'></i> " +
       magnitudes[i] + (magnitudes[i + 1] ? "&ndash;" + magnitudes[i + 1] + "<br>" : "+");
