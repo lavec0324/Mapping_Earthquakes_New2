@@ -44,23 +44,21 @@ let overlays = {
 L.control.layers(baseMaps, overlays).addTo(map);
 
 // Retrieve the tectonic data
-d3.json("https://github.com/fraxen/tectonicplates/blob/master/GeoJSON/PB2002_boundaries.json").then(function(data) {
+let tectonicMap = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
-  // Creating a GeoJSON layer with the retrieved data.
+d3.json(tectonicMap).then(function(data) {
+ console.log(data);
   L.geoJson(data, {
-    // We turn each feature into a circleMarker on the map.
-    pointToLayer: function(data) {
-        console.log(data);
-      },
-  }).addTo(tectonicPlates);
-    // Finally, we our legend to the map.
-    legend.addTo(map);
+    color: 'blue',
+    weight: 3
+  })
+  .addTo(tectonicPlates);
+  tectonicPlates.addTo(map);
 });
-
 
 // Retrieve the earthquake GeoJSON data.
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson").then(function(data) {
-
+  
   // This function returns the style data for each of the earthquakes we plot on
   // the map. We pass the magnitude of the earthquake into two separate functions
   // to calculate the color and radius.
